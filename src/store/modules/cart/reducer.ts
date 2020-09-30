@@ -1,9 +1,10 @@
 import { Reducer } from "redux";
 import produce from 'immer';
-import { ICartState } from "./types";
+import { ActionTypes, ICartState } from "./types";
 
 const INITIAL_STATE: ICartState = {
-    items: []
+    items: [],
+    failCheckStockItems: [],
 }
 
 const cart: Reducer<ICartState> = (state = INITIAL_STATE, action) => {
@@ -11,7 +12,7 @@ const cart: Reducer<ICartState> = (state = INITIAL_STATE, action) => {
     //como vamos ter vários cases e todos retornarão o produce, podemos fazer um wrapper do produce no switch
     return produce(state, draft => {
         switch (action.type) {
-            case 'ADD_PRODUCT_TO_CART': {
+            case ActionTypes.addProductToCartSuccess: {
                 const { product } = action.payload;
                 //atualizar a quantidade no carrinho, primeiro procura se já tem o item no carrinho e atualiza se tiver
                 const productIndex = state.items.findIndex(item => item.product.id === product.id);
@@ -41,6 +42,11 @@ const cart: Reducer<ICartState> = (state = INITIAL_STATE, action) => {
                 //     ]
                 // };
 
+            }
+            case ActionTypes.addProductToCartFailure: {
+                console.log('FAIL', action.payload);
+                draft.failCheckStockItems.push(action.payload.productId);
+                break;
             }
             default: {
                 return draft;
